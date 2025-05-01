@@ -15,23 +15,13 @@ public class GameLevel {
         this.backgroundImage = backgroundImage;
     }
 
-    public int getLevelNumber() {
-        return levelNumber;
-    }
+    public int getLevelNumber() {return levelNumber;}
 
-    public int getScoreThreshold() {
-        return scoreThreshold;
-    }
+    public int getScoreThreshold() {return scoreThreshold;}
 
-    public int getBoatSpeed() {
-        return boatSpeed;
-    }
+    public int getBoatSpeed() {return boatSpeed;}
 
-    public int getBoatCount() {
-        return boatCount;
-    }
+    public int getBoatCount() {return boatCount;}
 
-    public String getBackgroundImage() {
-        return backgroundImage;
-    }
+    public String getBackgroundImage() {return backgroundImage;}
 } 

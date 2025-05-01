@@ -16,7 +16,6 @@ public class AudioManager {
     private ExecutorService soundExecutor;
     private boolean isShutdown = false;
     
-    // Cache pour les sons préchargés
     private Map<String, CachedSound> soundCache;
     
     private static class CachedSound {
@@ -37,7 +36,6 @@ public class AudioManager {
 
     private void preloadSounds() {
         try {
-            // Précharger tous les sons utilisés dans le jeu
             loadAndCacheSound("tir.wav");
             loadAndCacheSound("collision.wav");
             loadAndCacheSound("mort.wav");
@@ -58,7 +56,6 @@ public class AudioManager {
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(file);
             AudioFormat baseFormat = audioIn.getFormat();
 
-            // Convertir au format cible
             AudioFormat targetFormat = new AudioFormat(
                 AudioFormat.Encoding.PCM_SIGNED,
                 22050.0f,
@@ -71,13 +68,10 @@ public class AudioManager {
 
             AudioInputStream convertedStream = AudioSystem.getAudioInputStream(targetFormat, audioIn);
             
-            // Lire toutes les données audio
             byte[] audioData = convertedStream.readAllBytes();
             
-            // Mettre en cache
             soundCache.put(soundFile, new CachedSound(audioData, targetFormat));
             
-            // Fermer les streams
             convertedStream.close();
             audioIn.close();
         } catch (Exception e) {
@@ -87,7 +81,7 @@ public class AudioManager {
 
     private synchronized void initExecutor() {
         if (soundExecutor == null || soundExecutor.isShutdown()) {
-            soundExecutor = Executors.newCachedThreadPool(); // Utiliser un pool de threads dynamique
+            soundExecutor = Executors.newCachedThreadPool();
             isShutdown = false;
         }
     }
@@ -111,19 +105,16 @@ public class AudioManager {
         initExecutor();
         soundExecutor.execute(() -> {
             try {
-                // Créer un nouveau stream à partir des données en cache
                 AudioInputStream audioStream = new AudioInputStream(
                     new ByteArrayInputStream(cachedSound.audioData),
                     cachedSound.format,
                     cachedSound.audioData.length / cachedSound.format.getFrameSize()
                 );
 
-                // Obtenir et jouer le clip
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioStream);
                 clip.start();
 
-                // Attendre la fin du son et nettoyer
                 clip.addLineListener(event -> {
                     if (event.getType() == LineEvent.Type.STOP) {
                         clip.close();
@@ -155,7 +146,6 @@ public class AudioManager {
                 AudioInputStream audioIn = AudioSystem.getAudioInputStream(file);
                 AudioFormat baseFormat = audioIn.getFormat();
 
-                // Convertir au format cible si nécessaire
                 AudioFormat targetFormat = new AudioFormat(
                     AudioFormat.Encoding.PCM_SIGNED,
                     22050.0f,
@@ -173,7 +163,6 @@ public class AudioManager {
                 backgroundMusic.loop(Clip.LOOP_CONTINUOUSLY);
                 isMusicPlaying = true;
 
-                // Fermer les streams
                 convertedStream.close();
                 audioIn.close();
             } catch (Exception e) {

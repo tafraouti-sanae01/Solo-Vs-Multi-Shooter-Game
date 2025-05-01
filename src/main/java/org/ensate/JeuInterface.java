@@ -94,7 +94,6 @@ public class JeuInterface extends JFrame {
         this.audioManager = AudioManager.getInstance();
         this.audioManager.reset();
 
-        // Initialisation du niveau selon le choix du joueur
         switch (niveau) {
             case "Debutant":
                 BATEAU_COUNT = 3;
@@ -195,39 +194,37 @@ public class JeuInterface extends JFrame {
         gamePanel.setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         mainPanel.add(gamePanel, BorderLayout.CENTER);
 
-        // Panel pour les informations en haut
         JPanel infoPanel = new JPanel();
         infoPanel.setLayout(null);
         infoPanel.setBounds(0, 0, GAME_WIDTH, 40);
         infoPanel.setOpaque(false);
         gamePanel.add(infoPanel);
 
-        // Nom du joueur
+
         JLabel playerLabel = new JLabel("Joueur: " + joueur);
         playerLabel.setFont(new Font("Arial", Font.BOLD, 16));
         playerLabel.setForeground(Color.WHITE);
         playerLabel.setBounds(10, 10, 200, 20);
         infoPanel.add(playerLabel);
 
-        // Score
+
         scoreLabel = new JLabel("Score: 0");
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 16));
         scoreLabel.setForeground(Color.WHITE);
         scoreLabel.setBounds(220, 10, 100, 20);
         infoPanel.add(scoreLabel);
 
-        // Niveau
+
         levelLabel = new JLabel("Niveau: " + niveau);
         levelLabel.setFont(new Font("Arial", Font.BOLD, 16));
         levelLabel.setForeground(Color.WHITE);
         levelLabel.setBounds(340, 10, 200, 20);
         infoPanel.add(levelLabel);
 
-        // Panneau de chat à droite
+
         JPanel chatPanel = new JPanel(new BorderLayout());
         chatPanel.setPreferredSize(new Dimension(CHAT_WIDTH, GAME_HEIGHT));
 
-        // En-tête du chat
         JPanel chatHeaderPanel = new JPanel(new BorderLayout());
         JLabel chatTitle = new JLabel("Chat du jeu", SwingConstants.CENTER);
         chatTitle.setFont(new Font("Arial", Font.BOLD, 14));
@@ -249,7 +246,6 @@ public class JeuInterface extends JFrame {
         chatPanel.add(inputPanel, BorderLayout.SOUTH);
         mainPanel.add(chatPanel, BorderLayout.EAST);
 
-        // Action envoyer message
         sendButton.addActionListener(e -> sendChatMessage());
         chatInput.addActionListener(e -> sendChatMessage());
 
@@ -273,7 +269,7 @@ public class JeuInterface extends JFrame {
         }
 
         avionLabel = new JLabel();
-        avionLabel.setBounds(GAME_WIDTH/2 - 40, GAME_HEIGHT - 120, 100, 100);
+        avionLabel.setBounds(GAME_WIDTH/2 - 50, GAME_HEIGHT - 150, 100, 100);
         gamePanel.add(avionLabel);
 
         bateauLabels = new ArrayList<>();
@@ -418,10 +414,10 @@ public class JeuInterface extends JFrame {
                 int x = avionLabel.getX();
                 int y = avionLabel.getY();
 
-                if (movingLeft && x > 0) x -= AVION_SPEED;
-                if (movingRight && x < GAME_WIDTH - 80) x += AVION_SPEED;
-                if (movingUp && y > 0) y -= AVION_SPEED;
-                if (movingDown && y < GAME_HEIGHT - 120) y += AVION_SPEED;
+                if (movingLeft && x > 20) x -= AVION_SPEED;
+                if (movingRight && x < GAME_WIDTH - 120) x += AVION_SPEED;
+                if (movingUp && y > 20) y -= AVION_SPEED;
+                if (movingDown && y < GAME_HEIGHT - 150) y += AVION_SPEED;
 
                 final int finalX = x;
                 final int finalY = y;
@@ -473,13 +469,12 @@ public class JeuInterface extends JFrame {
         if (!gameStarted || isPaused) return;
         
         SwingUtilities.invokeLater(() -> {
-            // Créer le projectile au centre de l'avion
             int projectileX = avionLabel.getX() + (avionLabel.getWidth() - 20) / 2;
             int projectileY = avionLabel.getY();
             
             Projectile projectile = new Projectile(projectileX, projectileY, tirImage, TIR_SPEED);
-        projectiles.add(projectile);
-        gamePanel.add(projectile.getLabel());
+            projectiles.add(projectile);
+            gamePanel.add(projectile.getLabel());
             gamePanel.revalidate();
             
             audioManager.playShootSound();
@@ -535,7 +530,7 @@ public class JeuInterface extends JFrame {
     private void checkCollisions() {
         if (!gameStarted || isPaused) return;
         
-        if (!isInvincible) { // Vérifier les collisions avec l'avion seulement s'il n'est pas invincible
+        if (!isInvincible) {
             Rectangle avionBounds = new Rectangle(
                 avionLabel.getX() + 20,
                 avionLabel.getY() + 20,
@@ -558,7 +553,6 @@ public class JeuInterface extends JFrame {
             }
         }
 
-        // Vérifier les collisions des projectiles avec les bateaux
         for (JLabel bateauLabel : bateauLabels) {
             Rectangle bateauBounds = new Rectangle(
                 bateauLabel.getX() + 10,
@@ -600,8 +594,8 @@ public class JeuInterface extends JFrame {
         private int x, y;
         private int speed;
         private boolean active;
-        private final int width = 20;  // Largeur fixe du projectile
-        private final int height = 20; // Hauteur fixe du projectile
+        private final int width = 20;
+        private final int height = 20;
 
         public Projectile(int startX, int startY, BufferedImage image, int speed) {
             this.x = startX;
@@ -645,21 +639,18 @@ public class JeuInterface extends JFrame {
     }
 
     private void handleCollision(JLabel bateauLabel) {
-        if (isInvincible) return; // Ignorer la collision si l'avion est invincible
+        if (isInvincible) return;
         
         vies--;
         updateLives();
         
-        // Jouer le son de collision
         audioManager.playCollisionSound();
         
-        // Repositionner le bateau
         resetBateau(bateauLabel);
         
         if (vies <= 0) {
             gameOver();
         } else {
-            // Rendre l'avion invincible temporairement
             makeInvincible();
         }
     }
@@ -667,14 +658,13 @@ public class JeuInterface extends JFrame {
     private void makeInvincible() {
         isInvincible = true;
         
-        // Animation de clignotement
         Timer blinkTimer = new Timer();
         blinkTimer.scheduleAtFixedRate(new TimerTask() {
             boolean visible = true;
             int count = 0;
             @Override
             public void run() {
-                if (count >= 8) { // 4 clignotements (8 changements d'état)
+                if (count >= 8) {
                     blinkTimer.cancel();
                     SwingUtilities.invokeLater(() -> avionLabel.setVisible(true));
                     return;
@@ -683,9 +673,8 @@ public class JeuInterface extends JFrame {
                 visible = !visible;
                 count++;
             }
-        }, 0, 250); // Clignotement toutes les 250ms
+        }, 0, 250);
 
-        // Timer pour désactiver l'invincibilité
         Timer invincibilityTimer = new Timer();
         invincibilityTimer.schedule(new TimerTask() {
             @Override
@@ -698,7 +687,6 @@ public class JeuInterface extends JFrame {
 
     private void updateLives() {
         SwingUtilities.invokeLater(() -> {
-            // Mettre à jour l'affichage des vies
             for (int i = 0; i < VIE_MAX; i++) {
                 if (i < vies) {
                     vieLabels.get(i).setVisible(true);
@@ -753,7 +741,6 @@ public class JeuInterface extends JFrame {
                 avionMovementThread = null;
             }
 
-            // Nettoyer les projectiles
             for (Projectile projectile : projectiles) {
                 if (projectile.getLabel().getParent() != null) {
                     gamePanel.remove(projectile.getLabel());
@@ -764,19 +751,16 @@ public class JeuInterface extends JFrame {
             audioManager.stopBackgroundMusic();
             audioManager.playDeathSound();
 
-            // Afficher l'animation de mort avec une taille plus petite
-            int mortSize = 100; // Taille réduite de l'image de mort
+            int mortSize = 150;
             JLabel mortLabel = new JLabel(new ImageIcon(mortImage.getScaledInstance(mortSize, mortSize, Image.SCALE_SMOOTH)));
-            // Centrer l'image de mort sur l'avion
             int mortX = avionLabel.getX() + (avionLabel.getWidth() - mortSize) / 2;
             int mortY = avionLabel.getY() + (avionLabel.getHeight() - mortSize) / 2;
             mortLabel.setBounds(mortX, mortY, mortSize, mortSize);
             gamePanel.add(mortLabel, 0);
-            avionLabel.setVisible(true); // Garder l'avion visible
+            avionLabel.setVisible(true);
             gamePanel.revalidate();
             gamePanel.repaint();
 
-            // Animation de l'image de mort
             Timer fadeTimer = new Timer();
             final float[] alpha = {1.0f};
             fadeTimer.scheduleAtFixedRate(new TimerTask() {
@@ -786,11 +770,10 @@ public class JeuInterface extends JFrame {
                     if (alpha[0] <= 0) {
                         fadeTimer.cancel();
                     SwingUtilities.invokeLater(() -> {
-                        // Sauvegarde du score en base MySQL
+
                         ScoreDatabase db = new ScoreDatabase();
                         db.saveOrUpdateScore(joueur, score);
 
-                            // Nettoyer l'interface graphique
                             gamePanel.removeAll();
                             gamePanel.revalidate();
                             gamePanel.repaint();
@@ -877,26 +860,22 @@ public class JeuInterface extends JFrame {
     }
 
     private void showLevelUpMessage() {
-        isPaused = true;  // Mettre le jeu en pause
-        
-        // Jouer le son de niveau supérieur
+        isPaused = true;
+
         audioManager.playLevelUpSound();
         
         final String message = "★ FÉLICITATIONS " + joueur.toUpperCase() + " ★\n" +
                              "Niveau " + getNiveauName(currentLevel) + " !";
 
-        // Créer une boîte de dialogue temporaire
         SwingUtilities.invokeLater(() -> {
             JDialog dialog = new JDialog(this, "", false);
-            dialog.setUndecorated(true); // Supprime la barre de titre
+            dialog.setUndecorated(true);
             
-            // Panneau principal
             JPanel mainPanel = new JPanel();
             mainPanel.setLayout(new BorderLayout());
-            mainPanel.setBackground(new Color(70, 130, 180)); // Bleu acier
+            mainPanel.setBackground(new Color(70, 130, 180));
             mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
-            // Message
             JLabel messageLabel = new JLabel(message);
             messageLabel.setFont(new Font("Arial", Font.BOLD, 18));
             messageLabel.setForeground(Color.WHITE);
@@ -907,7 +886,6 @@ public class JeuInterface extends JFrame {
             dialog.pack();
             dialog.setLocationRelativeTo(this);
 
-            // Timer pour fermer automatiquement
             Timer closeTimer = new Timer();
             closeTimer.schedule(new TimerTask() {
                 @Override
@@ -918,7 +896,7 @@ public class JeuInterface extends JFrame {
                         levelLabel.setText("Niveau: " + getNiveauName(currentLevel));
                     });
                 }
-            }, 1000); // Ferme après 1 seconde
+            }, 1000);
 
             dialog.setVisible(true);
         });
@@ -939,7 +917,6 @@ public class JeuInterface extends JFrame {
 
     @Override
     public void dispose() {
-        // Nettoyer les ressources du chat
         try {
             if (chatOut != null) chatOut.close();
             if (chatIn != null) chatIn.close();
@@ -963,7 +940,6 @@ public class JeuInterface extends JFrame {
             avionMovementThread = null;
         }
 
-        // Nettoyer les images
         if (avionImage != null) avionImage.flush();
         if (backgroundImage != null) backgroundImage.flush();
         if (tirImage != null) tirImage.flush();
@@ -976,7 +952,6 @@ public class JeuInterface extends JFrame {
             }
         }
 
-        // Nettoyer les projectiles
         for (Projectile projectile : projectiles) {
             if (projectile.getLabel().getParent() != null) {
                 gamePanel.remove(projectile.getLabel());
@@ -984,10 +959,8 @@ public class JeuInterface extends JFrame {
         }
         projectiles.clear();
 
-        // Nettoyer l'audio
         audioManager.cleanup();
 
-        // Nettoyer l'interface graphique
         gamePanel.removeAll();
         gamePanel.revalidate();
         gamePanel.repaint();
@@ -995,9 +968,7 @@ public class JeuInterface extends JFrame {
         super.dispose();
     }
 
-    // Méthodes pour le chat
     private void initializeChat() {
-        // Message initial du serveur avec délai
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -1030,11 +1001,11 @@ public class JeuInterface extends JFrame {
     private void appendChatMessage(String msg, String sender) {
         String color;
         if (sender.equals("Serveur")) {
-            color = "#008000"; // Vert pour le serveur
+            color = "#008000";
         } else if (sender.equals("Système")) {
-            color = "#0000FF"; // Bleu pour les messages système
+            color = "#0000FF";
         } else {
-            color = "#C00"; // Rouge pour le joueur
+            color = "#C00";
         }
         
         chatHistoryHtml.append("<span style='color:")
@@ -1051,10 +1022,8 @@ public class JeuInterface extends JFrame {
     private void sendChatMessage() {
         String msg = chatInput.getText().trim();
         if (!msg.isEmpty()) {
-            // Message du joueur
             appendChatMessage(msg, joueur);
             
-            // Réponse automatique du serveur
             Timer timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
@@ -1063,7 +1032,7 @@ public class JeuInterface extends JFrame {
                         appendChatMessage("Message reçu.", "Serveur");
                     });
                 }
-            }, 500); // Délai de 500ms pour simuler le traitement du serveur
+            }, 500);
             
             chatInput.setText("");
             requestFocusInWindow();

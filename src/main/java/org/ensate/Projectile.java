@@ -45,7 +45,6 @@ public class Projectile {
     public JLabel getLabel() {
         return label;
     }
-
     public boolean isActive() {
         return active;
     }

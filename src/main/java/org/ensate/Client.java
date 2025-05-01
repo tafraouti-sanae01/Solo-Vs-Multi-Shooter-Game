@@ -23,7 +23,6 @@ public class Client {
             bufferedReader = new BufferedReader(inputStreamReader);
             bufferedWriter = new BufferedWriter(outputStreamWriter);
 
-            // Lire le message de bienvenue du serveur
             String welcomeMsg = bufferedReader.readLine();
             System.out.println("Serveur: " + welcomeMsg);
 

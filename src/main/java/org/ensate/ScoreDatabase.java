@@ -4,8 +4,8 @@ import java.sql.*;
 
 public class ScoreDatabase {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/jeu_tir";
-    private static final String DB_USER = "root"; // adapte si besoin
-    private static final String DB_PASS = "";     // adapte si besoin
+    private static final String DB_USER = "root";
+    private static final String DB_PASS = "";
 
     public ScoreDatabase() {
         try {

@@ -21,7 +21,7 @@ public class Communication extends JFrame {
     private String avion;
     private int score;
     private ScoreDatabase scoreDB;
-    private static final int BUTTON_COOLDOWN = 1000; // 1 seconde de délai
+    private static final int BUTTON_COOLDOWN = 1000;
     private boolean canClick = true;
     private AudioManager audioManager;
 
@@ -33,7 +33,6 @@ public class Communication extends JFrame {
         this.scoreDB = new ScoreDatabase();
         this.audioManager = AudioManager.getInstance();
 
-        // Sauvegarder le score avant d'initialiser l'interface
         scoreDB.saveOrUpdateScore(joueur, score);
 
         setTitle("Game Over - " + joueur);
@@ -64,20 +63,17 @@ public class Communication extends JFrame {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.insets = new Insets(10, 0, 10, 0);
 
-        // Label pour le score actuel
         JLabel scoreLabel = new JLabel("Votre score: " + score);
         scoreLabel.setForeground(new Color(255, 255, 255));
         scoreLabel.setFont(new Font("Arial", Font.BOLD, 32));
         mainPanel.add(scoreLabel, gbc);
 
-        // Label pour le meilleur score
         int bestScore = scoreDB.getScore(joueur);
         JLabel bestScoreLabel = new JLabel("Meilleur score: " + bestScore);
-        bestScoreLabel.setForeground(new Color(255, 255, 0));
+        bestScoreLabel.setForeground(new Color(255, 0, 0, 255));
         bestScoreLabel.setFont(new Font("Arial", Font.BOLD, 28));
         mainPanel.add(bestScoreLabel, gbc);
 
-        // Message si c'est un nouveau record
         if (score > bestScore) {
             JLabel newRecordLabel = new JLabel("★ NOUVEAU RECORD ! ★");
             newRecordLabel.setForeground(new Color(0, 255, 0));
@@ -90,7 +86,6 @@ public class Communication extends JFrame {
         questionLabel.setFont(new Font("Arial", Font.BOLD, 24));
         mainPanel.add(questionLabel, gbc);
 
-        // Initialisation des boutons avec un style moderne
         rejouerButton = new JButton("Rejouer");
         retourButton = new JButton("Retour au menu");
         quitterButton = new JButton("Quitter");
@@ -136,7 +131,6 @@ public class Communication extends JFrame {
             choix = 0;
             SwingUtilities.invokeLater(() -> {
                 try {
-                    // Attendre un court instant pour permettre le nettoyage des ressources
                     Thread.sleep(100);
                     JeuInterface newGame = new JeuInterface(joueur, niveau, avion);
                     newGame.setVisible(true);
@@ -153,7 +147,6 @@ public class Communication extends JFrame {
             choix = 1;
             SwingUtilities.invokeLater(() -> {
                 try {
-                    // Attendre un court instant pour permettre le nettoyage des ressources
                     Thread.sleep(100);
                     JeuDeTir menu = new JeuDeTir();
                     menu.setVisible(true);
@@ -180,7 +173,6 @@ public class Communication extends JFrame {
         retourButton.setEnabled(false);
         quitterButton.setEnabled(false);
         
-        // Réactiver les boutons après un délai
         Timer timer = new Timer(BUTTON_COOLDOWN, e -> {
             enableButtons();
             ((Timer)e.getSource()).stop();
@@ -210,7 +202,6 @@ public class Communication extends JFrame {
 
     @Override
     public void dispose() {
-        // S'assurer que tous les composants sont nettoyés
         if (backgroundImage != null) {
             backgroundImage.flush();
         }

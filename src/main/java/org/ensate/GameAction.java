@@ -2,7 +2,7 @@ package org.ensate;
 import java.io.Serializable;
 
 public class GameAction implements Serializable {
-    public String action; // "move" ou "shoot"
+    public String action;
     public int x, y;
     public String actionData;
 

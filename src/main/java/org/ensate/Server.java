@@ -28,7 +28,6 @@ public class Server {
                     bufferedReader = new BufferedReader(inputStreamReader);
                     bufferedWriter = new BufferedWriter(outputStreamWriter);
 
-                    // Envoyer un message de bienvenue au client
                     bufferedWriter.write("Bienvenue sur le serveur de chat!");
                     bufferedWriter.newLine();
                     bufferedWriter.flush();

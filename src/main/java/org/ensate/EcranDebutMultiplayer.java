@@ -28,9 +28,6 @@ public class EcranDebutMultiplayer extends JFrame {
     private String avion;
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
-    private volatile boolean isConnected = true;  // Track connection state
-    private volatile boolean shouldReconnect = true;  // Control reconnection attempts
-    private final Object connectionLock = new Object();  // Lock for connection state
 
     // Ajout pour l'interface de jeu
     private BufferedImage vaisseau1Image, vaisseau2Image, fondEtoile;
@@ -100,12 +97,20 @@ public class EcranDebutMultiplayer extends JFrame {
     private String finalWinnerName = null;
     private int finalScore1 = 0, finalScore2 = 0;
 
+    private volatile boolean isConnected = true;
+
+    private AudioManager audioManager;
+
     public EcranDebutMultiplayer(String joueur, String niveau, String avion, Socket socket, boolean isHost) {
         this.joueur = joueur;
         this.niveau = niveau;
         this.avion = avion;
         this.socket = socket;
         this.isHost = isHost;
+        this.audioManager = AudioManager.getInstance();
+        
+        // Arrêter la musique de fond précédente
+        audioManager.stopBackgroundMusic();
 
         setTitle("Jeu de Tir - Mode Multijoueur");
         setSize(GAME_WIDTH + CHAT_WIDTH, GAME_HEIGHT);
@@ -129,6 +134,11 @@ public class EcranDebutMultiplayer extends JFrame {
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowOpened(java.awt.event.WindowEvent e) {
                 requestFocusInWindow();
+            }
+            
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                audioManager.cleanup();
             }
         });
     }
@@ -247,27 +257,36 @@ public class EcranDebutMultiplayer extends JFrame {
 
     private void startGameLoop() {
         new Thread(() -> {
-            while (shouldReconnect) {
-                try {
-                    synchronized (connectionLock) {
-                        while (isConnected) {
-                            Object receivedData = inputStream.readObject();
-                            if (receivedData == null) {
-                                throw new IOException("Connection ended by peer");
-                            }
-                            processReceivedData(receivedData);
-                        }
+            try {
+                while (isConnected) {
+                    try {
+                    Object receivedData = inputStream.readObject();
+                    processReceivedData(receivedData);
+                    } catch (EOFException e) {
+                        isConnected = false;
+                        SwingUtilities.invokeLater(() -> {
+                            JOptionPane.showMessageDialog(this,
+                                    "La connexion a été fermée par l'autre joueur",
+                                    "Déconnexion",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                            dispose();
+                        });
+                        break;
+            } catch (IOException | ClassNotFoundException e) {
+                        isConnected = false;
+                e.printStackTrace();
+                        SwingUtilities.invokeLater(() -> {
+                JOptionPane.showMessageDialog(this,
+                        "Erreur de connexion: " + e.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                dispose();
+                        });
+                        break;
                     }
-                } catch (IOException e) {
-                    handleDisconnection(e);
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                    break;
                 }
-                
-                if (shouldReconnect && !gameOver) {
-                    attemptReconnection();
-                }
+            } finally {
+                cleanup();
             }
         }).start();
     }
@@ -322,6 +341,7 @@ public class EcranDebutMultiplayer extends JFrame {
         Projectile p = new Projectile(x, y, tirImage, speed);
         if (isMine) {
             myProjectiles.add(p);
+            audioManager.playShootSound();
         } else {
             otherProjectiles.add(p);
         }
@@ -337,11 +357,13 @@ public class EcranDebutMultiplayer extends JFrame {
             // Collision avec l'avion du joueur local
             if (avion1Bounds.intersects(bateauBounds) && vies1 > 0) {
                 vies1--;
+                audioManager.playCollisionSound();
                 sendGameData(new GameAction("life", vies1, 0)); // Synchronise la vie
                 bateau.y = -BOAT_HEIGHT;
                 bateau.x = random.nextInt(GAME_WIDTH - BOAT_WIDTH);
                 if (vies1 <= 0) {
                     iAmDead = true;
+                    audioManager.playDeathSound();
                     sendGameData(new GameAction("gameover", 0, 0));
                     checkGameOver();
                 }
@@ -366,6 +388,9 @@ public class EcranDebutMultiplayer extends JFrame {
                     bateau.y = -BOAT_HEIGHT;
                     bateau.x = random.nextInt(GAME_WIDTH - BOAT_WIDTH);
                     score1 += 5;
+                    if (score1 % 50 == 0) { // Jouer le son levelup tous les 50 points
+                        audioManager.playLevelUpSound();
+                    }
                 }
             }
         }
@@ -385,57 +410,77 @@ public class EcranDebutMultiplayer extends JFrame {
     private void checkGameOver() {
         if ((vies1 <= 0 || iAmDead) && !gameOver) {
             gameOver = true;
-            // Détermine le vainqueur
             String winner;
+            if (isHost) {
             if (vies2 > 0 && !otherIsDead) {
-                winner = joueur2 + " (" + (isHost ? avionJoueur2 : avionJoueur1) + ")";
+                    winner = joueur2 + " (" + avionJoueur2 + ")";
             } else if (vies2 <= 0 || otherIsDead) {
                 winner = "Match nul";
             } else {
                 winner = joueur + " (" + avion + ")";
+                }
+            } else {
+                if (vies2 > 0 && !otherIsDead) {
+                    winner = joueur2 + " (" + avionJoueur1 + ")";
+                } else if (vies2 <= 0 || otherIsDead) {
+                    winner = "Match nul";
+                } else {
+                    winner = joueur + " (" + avionJoueur2 + ")";
+                }
             }
             finalWinnerName = winner;
-            finalScore1 = score1;
-            finalScore2 = score2;
-            // Envoie le vainqueur et les scores à l'autre joueur
-            sendGameData(new GameAction("gameover_sync", finalScore1, finalScore2, finalWinnerName));
+            sendGameData(new GameAction("gameover_sync", score1, score2, finalWinnerName));
             showGameOverDialog();
         } else if ((vies2 <= 0 || otherIsDead) && !gameOver) {
             gameOver = true;
             String winner;
+            if (isHost) {
             if (vies1 > 0 && !iAmDead) {
                 winner = joueur + " (" + avion + ")";
             } else if (vies1 <= 0 || iAmDead) {
                 winner = "Match nul";
             } else {
-                winner = joueur2 + " (" + (isHost ? avionJoueur2 : avionJoueur1) + ")";
+                    winner = joueur2 + " (" + avionJoueur2 + ")";
+                }
+            } else {
+                if (vies1 > 0 && !iAmDead) {
+                    winner = joueur2 + " (" + avionJoueur1 + ")";
+                } else if (vies1 <= 0 || iAmDead) {
+                    winner = "Match nul";
+                } else {
+                    winner = joueur + " (" + avionJoueur2 + ")";
+                }
             }
             finalWinnerName = winner;
-            finalScore1 = score1;
-            finalScore2 = score2;
-            sendGameData(new GameAction("gameover_sync", finalScore1, finalScore2, finalWinnerName));
+            sendGameData(new GameAction("gameover_sync", score1, score2, finalWinnerName));
             showGameOverDialog();
         }
     }
 
     private void showGameOverDialog() {
         SwingUtilities.invokeLater(() -> {
-            // Joue le son de mort
-            try {
-                AudioInputStream audioIn = AudioSystem.getAudioInputStream(new File("src/main/resources/son/mort.wav"));
-                Clip clip = AudioSystem.getClip();
-                clip.open(audioIn);
-                clip.start();
-            } catch (Exception e) {
-                e.printStackTrace();
+            audioManager.stopBackgroundMusic();
+            audioManager.playDeathSound();
+            
+            String msg = (finalWinnerName == null || finalWinnerName.equals("Match nul")) ? 
+                        "Match nul !" : 
+                        ("Le vainqueur est : " + finalWinnerName);
+
+            // Toujours afficher dans l'ordre de l'interface du joueur 1 (host)
+            if (isHost) {
+                msg += "\n" + joueur + " (" + avion + ") : " + score1;
+                msg += "\n" + joueur2 + " (" + avionJoueur2 + ") : " + score2;
+            } else {
+                // Pour le client, on inverse les scores pour correspondre à la vue du host
+                msg += "\n" + joueur2 + " (" + avionJoueur1 + ") : " + score2;
+                msg += "\n" + joueur + " (" + avionJoueur2 + ") : " + score1;
             }
-            String msg = (finalWinnerName == null || finalWinnerName.equals("Match nul")) ? "Match nul !" : ("Le vainqueur est : " + finalWinnerName);
-            msg += "\n" + joueur + " : " + finalScore1 + "\n" + joueur2 + " : " + finalScore2;
+
             JOptionPane.showMessageDialog(this, msg, "Fin de partie", JOptionPane.INFORMATION_MESSAGE);
-            // Sauvegarde du score du joueur local
             ScoreDatabase db = new ScoreDatabase();
-            db.saveOrUpdateScore(joueur, score1);
+            db.saveOrUpdateScore(joueur, isHost ? score1 : score2);
             if (gameTimer != null) gameTimer.cancel();
+            audioManager.cleanup();
             dispose();
         });
     }
@@ -459,9 +504,9 @@ public class EcranDebutMultiplayer extends JFrame {
                 otherIsDead = true;
                 checkGameOver();
             } else if ("gameover_sync".equals(action.action)) {
-                // Synchronisation du vainqueur et des scores
-                finalScore1 = action.x;
-                finalScore2 = action.y;
+                // Garder les scores tels qu'ils sont dans l'interface
+                finalScore1 = score1;
+                finalScore2 = score2;
                 finalWinnerName = action.actionData;
                 gameOver = true;
                 showGameOverDialog();
@@ -473,93 +518,57 @@ public class EcranDebutMultiplayer extends JFrame {
     }
 
     public void sendGameData(Object data) {
-        synchronized (connectionLock) {
-            if (!isConnected) {
-                return;
+        if (!isConnected) return;
+        try {
+            synchronized (outputStream) {
+            outputStream.writeObject(data);
+            outputStream.flush();
             }
-            try {
-                outputStream.writeObject(data);
-                outputStream.flush();
-            } catch (IOException e) {
-                handleDisconnection(e);
-            }
-        }
-    }
-
-    private void handleDisconnection(IOException e) {
-        synchronized (connectionLock) {
+        } catch (IOException e) {
             isConnected = false;
-            if (!gameOver) {
-                SwingUtilities.invokeLater(() -> {
-                    int choice = JOptionPane.showConfirmDialog(
-                        this,
-                        "La connexion avec l'autre joueur a été perdue. Voulez-vous attendre une reconnexion?",
+            e.printStackTrace();
+            SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(this,
+                    "Erreur d'envoi des données: " + e.getMessage(),
                         "Erreur de connexion",
-                        JOptionPane.YES_NO_OPTION
-                    );
-                    shouldReconnect = (choice == JOptionPane.YES_OPTION);
-                    if (!shouldReconnect) {
-                        cleanupAndExit();
-                    }
-                });
-            } else {
-                shouldReconnect = false;
-            }
+                    JOptionPane.ERROR_MESSAGE);
+                dispose();
+            });
         }
     }
 
-    private void attemptReconnection() {
-        synchronized (connectionLock) {
-            try {
-                if (socket != null && !socket.isClosed()) {
-                    socket.close();
-                }
-                socket = new Socket(socket.getInetAddress(), socket.getPort());
-                outputStream = new ObjectOutputStream(socket.getOutputStream());
-                inputStream = new ObjectInputStream(socket.getInputStream());
-                isConnected = true;
-                
-                // Resynchronize game state
-                sendGameData(new GameAction("sync_request", score1, score2));
-                
-                SwingUtilities.invokeLater(() -> {
-                    JOptionPane.showMessageDialog(
-                        this,
-                        "Reconnexion réussie!",
-                        "Connexion",
-                        JOptionPane.INFORMATION_MESSAGE
-                    );
-                });
-            } catch (IOException e) {
-                try {
-                    Thread.sleep(2000); // Wait before next attempt
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                }
-            }
-        }
-    }
-
-    private void cleanupAndExit() {
-        gameOver = true;
+    private void cleanup() {
+        isConnected = false;
         if (gameTimer != null) {
             gameTimer.cancel();
         }
-        dispose();
+        try {
+            if (inputStream != null) {
+                inputStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void dispose() {
-        shouldReconnect = false;
-        synchronized (connectionLock) {
-            try {
-                if (inputStream != null) inputStream.close();
-                if (outputStream != null) outputStream.close();
-                if (socket != null) socket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        audioManager.cleanup();
+        cleanup();
         super.dispose();
     }
 

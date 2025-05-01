@@ -44,7 +44,6 @@ public class JeuDeTir extends javax.swing.JFrame {
         setSize(650, 450);
         this.audioManager = AudioManager.getInstance();
 
-        // Rendre tous les boutons radio transparents
         debutantRadioButton.setOpaque(false);
         intermediaireRadioButton.setOpaque(false);
         professionnelRadioButton.setOpaque(false);
@@ -254,7 +253,6 @@ public class JeuDeTir extends javax.swing.JFrame {
         modeSelectionDialog.setResizable(false);
         modeSelectionDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-        // Panel principal avec dégradé
         JPanel mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -272,16 +270,13 @@ public class JeuDeTir extends javax.swing.JFrame {
         };
         mainPanel.setLayout(new GridBagLayout());
 
-        // Titre
         JLabel titleLabel = new JLabel("Sélection du mode de jeu");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setForeground(new Color(70, 130, 180));
 
-        // Boutons stylisés
         JButton singlePlayerButton = createStyledButton("Mode Monojoueur");
         JButton multiPlayerButton = createStyledButton("Mode Multijoueur");
 
-        // Layout
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -331,20 +326,16 @@ public class JeuDeTir extends javax.swing.JFrame {
         mainPanel.setLayout(new GridBagLayout());
         mainPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-        // Icône question
         ImageIcon questionIcon = new ImageIcon("src/main/resources/images/question_icon.png");
         JLabel iconLabel = new JLabel(questionIcon);
 
-        // Titre
         JLabel titleLabel = new JLabel("Que souhaitez-vous faire ?");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titleLabel.setForeground(new Color(70, 130, 180));
 
-        // Boutons
         JButton createButton = createStyledButton("Créer une partie");
         JButton joinButton = createStyledButton("Rejoindre une partie");
 
-        // Layout
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -438,7 +429,6 @@ public class JeuDeTir extends javax.swing.JFrame {
             waitPanel.setLayout(new GridBagLayout());
             waitPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-            // Icône information
             ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
             JLabel iconLabel = new JLabel(infoIcon);
 
@@ -514,7 +504,6 @@ public class JeuDeTir extends javax.swing.JFrame {
         joinPanel.setLayout(new GridBagLayout());
         joinPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-        // Icône question
         ImageIcon questionIcon = new ImageIcon("src/main/resources/images/question_icon.png");
         JLabel iconLabel = new JLabel(questionIcon);
 
