@@ -6,7 +6,7 @@ This project is a shooting game developed in Java, using Swing for the graphical
    - A main interface (`JeuInterface.java`) that manages the core gameplay
    - An audio management system (`AudioManager.java`) for sound effects and music
    - A score database (`ScoreDatabase.java`) for result persistence
-   - A real-time communication system (`Communication.java`) for integrated chat
+   - A real-time communication system for integrated chat
 
 2. **Main Features**:
    - Progressive level system (Beginner to Master level)
@@ -24,7 +24,7 @@ This project is a shooting game developed in Java, using Swing for the graphical
    - Responsive user interface with smooth animations
 
 4. **Multimedia Resources**:
-   - Custom images for aircraft, ships, projectiles, and visual effects
+   - Custom images for aircraft, projectiles, and visual effects
    - Sound effects for shooting, collisions, and level changes
    - Modern user interface with transitions and animations
 
