@@ -3,7 +3,7 @@
 This project is a shooting game developed in Java, using Swing for the graphical interface. The game features a well-structured architecture with several key components:
 
 1. **Game Architecture**:
-   - A main interface (`JeuInterface.java`) that manages the core gameplay
+   - A main interface (# JeuInterface.java) that manages the core gameplay
    - An audio management system (`AudioManager.java`) for sound effects and music
    - A score database (`ScoreDatabase.java`) for result persistence
    - A real-time communication system (`Communication.java`) for integrated chat
