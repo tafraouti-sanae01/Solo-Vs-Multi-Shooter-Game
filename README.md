@@ -57,3 +57,9 @@ For multiplayer mode and real-time chat, the game uses **Radmin VPN** to establi
 - Minimal latency for smooth gameplay experience
 - Simplified network configuration for users
 - Support for remote multiplayer sessions
+
+## Authors
+This project was developed by:
+- TAFRAOUTI Sanae
+- ESSEBAIY Aya
+- ELMESSAOUDI Fatima
