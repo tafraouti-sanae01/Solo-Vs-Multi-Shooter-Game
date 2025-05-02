@@ -29,11 +29,10 @@ public class EcranDebutMultiplayer extends JFrame {
     private ObjectInputStream inputStream;
     private ObjectOutputStream outputStream;
 
-    // Ajout pour l'interface de jeu
     private BufferedImage vaisseau1Image, vaisseau2Image, fondEtoile;
     private String joueur2 = "Joueur 2";
     private int score1 = 0, score2 = 0;
-    private int vies1 = 3, vies2 = 3; // 3 vies par défaut
+    private int vies1 = 3, vies2 = 3;
     private boolean gameOver = false;
     private BufferedImage vieImage;
     private BufferedImage viePerdueImage;
@@ -47,11 +46,10 @@ public class EcranDebutMultiplayer extends JFrame {
     private final int CHAT_WIDTH = 350;
     int otherX, otherY;
     int myX, myY, BOAT_WIDTH, BOAT_HEIGHT;
-    // Ajout pour gérer les avions choisis par chaque joueur
+
     private String avionJoueur1;
     private String avionJoueur2;
 
-    // Remplacer les JLabel par un panel custom
     private GamePanel gamePanel;
 
     private BufferedImage[] bateauImages;
@@ -64,7 +62,6 @@ public class EcranDebutMultiplayer extends JFrame {
     private Timer gameTimer;
     private Random random = new Random();
 
-    // Classe interne pour les bateaux ennemis
     class Bateau {
         int x, y, type;
         public Bateau(int x, int y, int type) {
@@ -77,23 +74,19 @@ public class EcranDebutMultiplayer extends JFrame {
         }
     }
 
-    // Ajout d'un flag pour savoir si ce joueur est mort
     private boolean iAmDead = false;
     private boolean otherIsDead = false;
     private String winnerName = "";
 
-    // Chat intégré
     private JTextPane chatArea;
     private JTextField chatInput;
     private JButton sendButton;
     private StringBuilder chatHistoryHtml = new StringBuilder("<html>");
 
-    // Caractéristiques dynamiques des avions
     private int vieMax1, vieMax2;
     private int avionSpeed1, avionSpeed2;
     private int tirSpeed1, tirSpeed2;
 
-    // Ajout pour synchronisation du vainqueur et des scores
     private String finalWinnerName = null;
     private int finalScore1 = 0, finalScore2 = 0;
 
@@ -109,7 +102,6 @@ public class EcranDebutMultiplayer extends JFrame {
         this.isHost = isHost;
         this.audioManager = AudioManager.getInstance();
         
-        // Arrêter la musique de fond précédente
         audioManager.stopBackgroundMusic();
 
         setTitle("Jeu de Tir - Mode Multijoueur");
@@ -117,7 +109,6 @@ public class EcranDebutMultiplayer extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Initialisation des positions des avions
         BOAT_WIDTH = 80;
         BOAT_HEIGHT = 80;
         myX = 150;
@@ -148,31 +139,26 @@ public class EcranDebutMultiplayer extends JFrame {
             if (isHost) {
                 outputStream = new ObjectOutputStream(socket.getOutputStream());
                 inputStream = new ObjectInputStream(socket.getInputStream());
-                // Envoie ton avion, puis reçois celui de l'autre
                 outputStream.writeObject(avion);
                 outputStream.flush();
                 String avionAdverse = (String) inputStream.readObject();
-                avionJoueur1 = avion;           // avion du joueur local (host)
-                avionJoueur2 = avionAdverse;    // avion du joueur distant (client)
-                // Échange du nom du joueur
+                avionJoueur1 = avion;
+                avionJoueur2 = avionAdverse;
                 outputStream.writeObject(joueur);
                 outputStream.flush();
                 joueur2 = (String) inputStream.readObject();
             } else {
                 inputStream = new ObjectInputStream(socket.getInputStream());
                 outputStream = new ObjectOutputStream(socket.getOutputStream());
-                // Reçois d'abord l'avion adverse, puis envoie le tien
                 String avionAdverse = (String) inputStream.readObject();
                 outputStream.writeObject(avion);
                 outputStream.flush();
-                avionJoueur1 = avionAdverse;    // avion du joueur distant (host)
-                avionJoueur2 = avion;           // avion du joueur local (client)
-                // Échange du nom du joueur
+                avionJoueur1 = avionAdverse;
+                avionJoueur2 = avion;
                 joueur2 = (String) inputStream.readObject();
                 outputStream.writeObject(joueur);
                 outputStream.flush();
             }
-            // Initialiser les caractéristiques d'avion pour chaque joueur
             initAvionCaracs();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -182,7 +168,6 @@ public class EcranDebutMultiplayer extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             dispose();
         }
-        // Charger les images après avoir les deux noms d'avion
         try {
             String avion1FileName = avionJoueur1.replace("/", "").replace(" ", "");
             String avion2FileName = avionJoueur2.replace("/", "").replace(" ", "");
@@ -208,7 +193,6 @@ public class EcranDebutMultiplayer extends JFrame {
         gamePanel.setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
         mainPanel.add(gamePanel, BorderLayout.CENTER);
 
-        // Panneau de chat à droite
         JPanel chatPanel = new JPanel(new BorderLayout());
         chatPanel.setPreferredSize(new Dimension(CHAT_WIDTH, GAME_HEIGHT));
         chatArea = new JTextPane();
@@ -226,7 +210,6 @@ public class EcranDebutMultiplayer extends JFrame {
         mainPanel.add(chatPanel, BorderLayout.EAST);
         add(mainPanel);
 
-        // Action envoyer message
         sendButton.addActionListener(e -> sendChatMessage());
         chatInput.addActionListener(e -> sendChatMessage());
 
@@ -276,10 +259,6 @@ public class EcranDebutMultiplayer extends JFrame {
                         isConnected = false;
                 e.printStackTrace();
                         SwingUtilities.invokeLater(() -> {
-                JOptionPane.showMessageDialog(this,
-                        "Erreur de connexion: " + e.getMessage(),
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
                 dispose();
                         });
                         break;
@@ -296,7 +275,7 @@ public class EcranDebutMultiplayer extends JFrame {
         bateaux.clear();
         for (int i = 0; i < BATEAU_COUNT; i++) {
             int x = random.nextInt(GAME_WIDTH - BOAT_WIDTH);
-            int y = random.nextInt(200) - 200; // Commence hors écran
+            int y = random.nextInt(200) - 200;
             bateaux.add(new Bateau(x, y, i % BATEAU_COUNT));
         }
         gameTimer = new Timer();
@@ -351,14 +330,12 @@ public class EcranDebutMultiplayer extends JFrame {
         if (gameOver || iAmDead) return;
         Rectangle avion1Bounds = new Rectangle(myX, myY, BOAT_WIDTH, BOAT_HEIGHT);
         Rectangle avion2Bounds = new Rectangle(otherX, otherY, BOAT_WIDTH, BOAT_HEIGHT);
-        // Collisions avion-bateau
         for (Bateau bateau : bateaux) {
             Rectangle bateauBounds = bateau.getBounds();
-            // Collision avec l'avion du joueur local
             if (avion1Bounds.intersects(bateauBounds) && vies1 > 0) {
                 vies1--;
                 audioManager.playCollisionSound();
-                sendGameData(new GameAction("life", vies1, 0)); // Synchronise la vie
+                sendGameData(new GameAction("life", vies1, 0));
                 bateau.y = -BOAT_HEIGHT;
                 bateau.x = random.nextInt(GAME_WIDTH - BOAT_WIDTH);
                 if (vies1 <= 0) {
@@ -368,7 +345,6 @@ public class EcranDebutMultiplayer extends JFrame {
                     checkGameOver();
                 }
             }
-            // Collision avec l'avion du joueur distant
             if (avion2Bounds.intersects(bateauBounds) && vies2 > 0) {
                 vies2--;
                 if (vies2 <= 0) {
@@ -379,7 +355,6 @@ public class EcranDebutMultiplayer extends JFrame {
                 bateau.x = random.nextInt(GAME_WIDTH - BOAT_WIDTH);
             }
         }
-        // Collisions projectiles-bateaux
         for (Projectile p : myProjectiles) {
             Rectangle pb = p.getBounds();
             for (Bateau bateau : bateaux) {
@@ -388,7 +363,7 @@ public class EcranDebutMultiplayer extends JFrame {
                     bateau.y = -BOAT_HEIGHT;
                     bateau.x = random.nextInt(GAME_WIDTH - BOAT_WIDTH);
                     score1 += 5;
-                    if (score1 % 50 == 0) { // Jouer le son levelup tous les 50 points
+                    if (score1 % 50 == 0) {
                         audioManager.playLevelUpSound();
                     }
                 }
@@ -466,12 +441,10 @@ public class EcranDebutMultiplayer extends JFrame {
                         "Match nul !" : 
                         ("Le vainqueur est : " + finalWinnerName);
 
-            // Toujours afficher dans l'ordre de l'interface du joueur 1 (host)
             if (isHost) {
                 msg += "\n" + joueur + " (" + avion + ") : " + score1;
                 msg += "\n" + joueur2 + " (" + avionJoueur2 + ") : " + score2;
             } else {
-                // Pour le client, on inverse les scores pour correspondre à la vue du host
                 msg += "\n" + joueur2 + " (" + avionJoueur1 + ") : " + score2;
                 msg += "\n" + joueur + " (" + avionJoueur2 + ") : " + score1;
             }
@@ -504,7 +477,6 @@ public class EcranDebutMultiplayer extends JFrame {
                 otherIsDead = true;
                 checkGameOver();
             } else if ("gameover_sync".equals(action.action)) {
-                // Garder les scores tels qu'ils sont dans l'interface
                 finalScore1 = score1;
                 finalScore2 = score2;
                 finalWinnerName = action.actionData;
@@ -572,7 +544,6 @@ public class EcranDebutMultiplayer extends JFrame {
         super.dispose();
     }
 
-    // Panel custom pour le rendu du jeu
     class GamePanel extends JPanel {
         public GamePanel() {
             setPreferredSize(new Dimension(GAME_WIDTH, GAME_HEIGHT));
@@ -582,68 +553,56 @@ public class EcranDebutMultiplayer extends JFrame {
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-            // Fond étoilé
             if (fondEtoile != null) {
                 g.drawImage(fondEtoile, 0, 0, getWidth(), getHeight(), null);
             }
-            // Affichage miroir strict selon le rôle
             g.setColor(Color.WHITE);
             g.setFont(new Font("Segoe UI", Font.BOLD, 15));
             if (isHost) {
-                // Joueur local à gauche, autre à droite
                 g.drawString(joueur + " (" + avionJoueur1 + ")", 20, 30);
                 g.drawString("Score: " + score1, 20, 55);
                 g.drawString(joueur2 + " (" + avionJoueur2 + ")", GAME_WIDTH - 320, 30);
                 g.drawString("Score: " + score2, GAME_WIDTH - 320, 55);
                 g.setFont(new Font("Segoe UI", Font.BOLD, 16));
                 g.drawString("Niveau: " + niveau, GAME_WIDTH/2 - 80, 35);
-                // Vies du joueur local à gauche
                 for (int i = 0; i < vieMax1; i++) {
                     BufferedImage img = (i < vies1) ? vieImage : viePerdueImage;
                     g.drawImage(img, 20 + i*35, 80, 30, 30, null);
                 }
-                // Vies de l'autre joueur à droite
                 for (int i = 0; i < vieMax2; i++) {
                     BufferedImage img = (i < vies2) ? vieImage : viePerdueImage;
                     g.drawImage(img, GAME_WIDTH - 320 + i*35, 80, 30, 30, null);
                 }
             } else {
-                // Joueur local à droite, autre à gauche
                 g.drawString(joueur2 + " (" + avionJoueur2 + ")", 20, 30);
                 g.drawString("Score: " + score2, 20, 55);
                 g.drawString(joueur + " (" + avionJoueur1 + ")", GAME_WIDTH - 320, 30);
                 g.drawString("Score: " + score1, GAME_WIDTH - 320, 55);
                 g.setFont(new Font("Segoe UI", Font.BOLD, 16));
                 g.drawString("Niveau: " + niveau, GAME_WIDTH/2 - 80, 35);
-                // Vies de l'autre joueur à gauche
                 for (int i = 0; i < vieMax2; i++) {
                     BufferedImage img = (i < vies2) ? vieImage : viePerdueImage;
                     g.drawImage(img, 20 + i*35, 80, 30, 30, null);
                 }
-                // Vies du joueur local à droite
                 for (int i = 0; i < vieMax1; i++) {
                     BufferedImage img = (i < vies1) ? vieImage : viePerdueImage;
                     g.drawImage(img, GAME_WIDTH - 320 + i*35, 80, 30, 30, null);
                 }
             }
-            // Bateaux ennemis
             for (Bateau bateau : bateaux) {
                 if (bateauImages != null && bateauImages.length > 0)
                     g.drawImage(bateauImages[bateau.type], bateau.x, bateau.y, BOAT_WIDTH, BOAT_HEIGHT, null);
             }
-            // Vaisseaux
             if (vaisseau1Image != null)
                 g.drawImage(vaisseau1Image, myX, myY, BOAT_WIDTH, BOAT_HEIGHT, null);
             if (vaisseau2Image != null)
                 g.drawImage(vaisseau2Image, otherX, otherY, BOAT_WIDTH, BOAT_HEIGHT, null);
-            // Projectiles
             for (Projectile p : myProjectiles) {
                 p.draw(g);
             }
             for (Projectile p : otherProjectiles) {
                 p.draw(g);
             }
-            // Message de fin de partie
             if (gameOver) {
                 g.setColor(Color.RED);
                 g.setFont(new Font("Arial", Font.BOLD, 40));
@@ -677,7 +636,6 @@ public class EcranDebutMultiplayer extends JFrame {
         }
     }
 
-    // Affichage d'un message dans la zone de chat (HTML stylisé)
     private void appendChatMessage(String msg, String sender) {
         chatHistoryHtml.append("<span style='color:#C00;font-weight:bold;font-size:12px;'>")
                 .append(sender)
@@ -688,26 +646,22 @@ public class EcranDebutMultiplayer extends JFrame {
         chatArea.setCaretPosition(chatArea.getDocument().getLength());
     }
 
-    // Surcharge pour compatibilité
     private void appendChatMessage(String msg) {
         chatHistoryHtml.append(msg).append("<br>");
         chatArea.setText(chatHistoryHtml.toString() + "</html>");
         chatArea.setCaretPosition(chatArea.getDocument().getLength());
     }
 
-    // Envoi d'un message de chat
     private void sendChatMessage() {
         String msg = chatInput.getText().trim();
         if (!msg.isEmpty()) {
             appendChatMessage(msg, joueur);
             sendGameData(new ChatMessage(joueur, msg));
             chatInput.setText("");
-            // Reprend le focus sur le jeu après envoi
             requestFocusInWindow();
         }
     }
 
-    // Classe pour les messages de chat
     public static class ChatMessage implements Serializable {
         public String joueur;
         public String message;
@@ -717,9 +671,7 @@ public class EcranDebutMultiplayer extends JFrame {
         }
     }
 
-    // Initialisation des caractéristiques d'avion pour chaque joueur
     private void initAvionCaracs() {
-        // Joueur local (toujours 'avion')
         switch (avion) {
             case "MiG-51S": vieMax1 = 4; avionSpeed1 = 8; tirSpeed1 = 8; break;
             case "F/A-28A": vieMax1 = 5; avionSpeed1 = 7; tirSpeed1 = 9; break;
@@ -727,7 +679,6 @@ public class EcranDebutMultiplayer extends JFrame {
             case "Su-51K": vieMax1 = 6; avionSpeed1 = 6; tirSpeed1 = 10; break;
             default: vieMax1 = 4; avionSpeed1 = 7; tirSpeed1 = 8;
         }
-        // Joueur adverse (toujours avionJoueur1 si client, avionJoueur2 si host)
         String avionAdv = isHost ? avionJoueur2 : avionJoueur1;
         switch (avionAdv) {
             case "MiG-51S": vieMax2 = 4; avionSpeed2 = 8; tirSpeed2 = 8; break;

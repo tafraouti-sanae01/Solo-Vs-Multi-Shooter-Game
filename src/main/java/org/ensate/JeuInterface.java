@@ -59,13 +59,11 @@ public class JeuInterface extends JFrame {
     private final int VIE_MAX;
     private final int BATEAU_COUNT;
 
-    // Composants du chat
     private JTextPane chatArea;
     private JTextField chatInput;
     private JButton sendButton;
     private StringBuilder chatHistoryHtml = new StringBuilder("<html>");
     
-    // Composants pour le chat serveur-client
     private ServerSocket chatServerSocket;
     private Socket chatClientSocket;
     private PrintWriter chatOut;
@@ -85,7 +83,7 @@ public class JeuInterface extends JFrame {
     private boolean gameStarted = false;
 
     private boolean isInvincible = false;
-    private static final int INVINCIBILITY_DURATION = 2000; // 2 secondes d'invincibilité
+    private static final int INVINCIBILITY_DURATION = 2000;
 
     public JeuInterface(String joueur, String niveau, String avion) {
         this.joueur = joueur;
@@ -365,7 +363,7 @@ public class JeuInterface extends JFrame {
         Random random = new Random();
         for (JLabel bateauLabel : bateauLabels) {
             int x = random.nextInt(GAME_WIDTH - 80);
-            bateauLabel.setLocation(x, -50); // Positionner tous les bateaux au-dessus de l'écran
+            bateauLabel.setLocation(x, -50);
         }
 
         this.addKeyListener(new KeyAdapter() {
@@ -434,7 +432,6 @@ public class JeuInterface extends JFrame {
         });
         avionMovementThread.start();
 
-        // Ajouter un délai avant de démarrer le mouvement des bateaux
         Timer startTimer = new Timer();
         startTimer.schedule(new TimerTask() {
             @Override
@@ -442,7 +439,7 @@ public class JeuInterface extends JFrame {
                 gameStarted = true;
                 startTimer.cancel();
             }
-        }, 1000); // Délai de 1 seconde
+        }, 1000);
 
         collisionTimer = new Timer();
         collisionTimer.scheduleAtFixedRate(new TimerTask() {
@@ -454,7 +451,7 @@ public class JeuInterface extends JFrame {
                 updateProjectiles();
             }
             }
-        }, 1000, 50); // Démarrer après 1 seconde
+        }, 1000, 50);
     }
 
     @Override
@@ -693,7 +690,7 @@ public class JeuInterface extends JFrame {
                     viePerdueLabels.get(i).setVisible(false);
                 } else {
                     vieLabels.get(i).setVisible(false);
-                    if (i == vies) { // Animer seulement la vie qui vient d'être perdue
+                    if (i == vies) {
                         viePerdueLabels.get(i).setVisible(true);
                         animateLostLife(i);
                     }
