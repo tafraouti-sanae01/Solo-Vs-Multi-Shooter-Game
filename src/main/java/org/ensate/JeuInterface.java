@@ -51,8 +51,7 @@ public class JeuInterface extends JFrame {
 
     private final int GAME_WIDTH = 900;
     private final int GAME_HEIGHT = 700;
-    private final int CHAT_WIDTH = 350;  // Largeur du panneau de chat
-    private final int CHAT_PORT = 1234;  // Port pour le chat
+    private final int CHAT_WIDTH = 350;
     private int bateauSpeed;
     private final int TIR_SPEED;
     private final int AVION_SPEED;
@@ -63,7 +62,7 @@ public class JeuInterface extends JFrame {
     private JTextField chatInput;
     private JButton sendButton;
     private StringBuilder chatHistoryHtml = new StringBuilder("<html>");
-    
+
     private ServerSocket chatServerSocket;
     private Socket chatClientSocket;
     private PrintWriter chatOut;
@@ -861,7 +860,7 @@ public class JeuInterface extends JFrame {
 
         audioManager.playLevelUpSound();
         
-        final String message = "★ FÉLICITATIONS " + joueur.toUpperCase() + " ★\n" +
+        final String message = "FÉLICITATIONS " + joueur.toUpperCase() + "\n" +
                              "Niveau " + getNiveauName(currentLevel) + " !";
 
         SwingUtilities.invokeLater(() -> {
@@ -967,23 +966,6 @@ public class JeuInterface extends JFrame {
 
     private void initializeChat() {
         Timer timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                SwingUtilities.invokeLater(() -> {
-                    appendChatMessage("Serveur démarré. En attente de connexions...", "Système");
-                });
-            }
-        }, 500);
-
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                SwingUtilities.invokeLater(() -> {
-                    appendChatMessage("Connecté au serveur!", "Système");
-                });
-            }
-        }, 1500);
 
         timer.schedule(new TimerTask() {
             @Override
@@ -999,8 +981,6 @@ public class JeuInterface extends JFrame {
         String color;
         if (sender.equals("Serveur")) {
             color = "#008000";
-        } else if (sender.equals("Système")) {
-            color = "#0000FF";
         } else {
             color = "#C00";
         }

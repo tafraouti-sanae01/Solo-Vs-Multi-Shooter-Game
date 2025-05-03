@@ -75,7 +75,7 @@ public class Communication extends JFrame {
         mainPanel.add(bestScoreLabel, gbc);
 
         if (score > bestScore) {
-            JLabel newRecordLabel = new JLabel("★ NOUVEAU RECORD ! ★");
+            JLabel newRecordLabel = new JLabel("NOUVEAU RECORD !");
             newRecordLabel.setForeground(new Color(0, 255, 0));
             newRecordLabel.setFont(new Font("Arial", Font.BOLD, 36));
             mainPanel.add(newRecordLabel, gbc);
