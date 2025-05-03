@@ -38,9 +38,7 @@ The project demonstrates excellent object-oriented architecture with clear separ
 ## Technologies Used
 - Java
 - Swing
-- Java Sound API
-- Java Networking
-- SQLite (for score persistence)
+- SQL (for score persistence)
 - Radmin VPN (for virtual network connection)
 
 ## Features
