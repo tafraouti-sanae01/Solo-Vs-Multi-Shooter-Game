@@ -90,7 +90,7 @@ public class JeuDeTir extends javax.swing.JFrame {
         niveauGroup.add(hautNiveauRadioButton);
 
         avionGroup = new ButtonGroup();
-        avionGroup.add(miG51SRadioButton); 
+        avionGroup.add(miG51SRadioButton);
         avionGroup.add(fA28ARadioButton);
         avionGroup.add(su55RadioButton);
         avionGroup.add(su51KRadioButton);
@@ -114,7 +114,7 @@ public class JeuDeTir extends javax.swing.JFrame {
                     if (!line.trim().isEmpty()) {
                         comboBox1.addItem(line.trim());
                     }
-                    
+
                 }
                 reader.close();
             }
@@ -281,7 +281,7 @@ public class JeuDeTir extends javax.swing.JFrame {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(20, 50, 20, 50);
-        
+
         mainPanel.add(titleLabel, gbc);
         gbc.insets = new Insets(10, 50, 10, 50);
         mainPanel.add(singlePlayerButton, gbc);
@@ -305,7 +305,7 @@ public class JeuDeTir extends javax.swing.JFrame {
     private void showMultiplayerOptions() {
         JDialog optionsDialog = new JDialog(this, "", true);
         optionsDialog.setUndecorated(true);
-        optionsDialog.setSize(400, 200);
+        optionsDialog.setSize(400, 250);
         optionsDialog.setLocationRelativeTo(this);
 
         JPanel mainPanel = new JPanel() {
@@ -335,6 +335,8 @@ public class JeuDeTir extends javax.swing.JFrame {
 
         JButton createButton = createStyledButton("Créer une partie");
         JButton joinButton = createStyledButton("Rejoindre une partie");
+        JButton createDuelButton = createStyledButton("Créer un duel 1v1");
+        JButton joinDuelButton = createStyledButton("Rejoindre un duel 1v1");
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
@@ -349,8 +351,12 @@ public class JeuDeTir extends javax.swing.JFrame {
         mainPanel.add(headerPanel, gbc);
         gbc.insets = new Insets(20, 50, 10, 50);
         mainPanel.add(createButton, gbc);
-        gbc.insets = new Insets(10, 50, 20, 50);
+        gbc.insets = new Insets(10, 50, 10, 50);
         mainPanel.add(joinButton, gbc);
+        gbc.insets = new Insets(10, 50, 10, 50);
+        mainPanel.add(createDuelButton, gbc);
+        gbc.insets = new Insets(10, 50, 20, 50);
+        mainPanel.add(joinDuelButton, gbc);
 
         createButton.addActionListener(e -> {
             optionsDialog.dispose();
@@ -360,6 +366,16 @@ public class JeuDeTir extends javax.swing.JFrame {
         joinButton.addActionListener(e -> {
             optionsDialog.dispose();
             joinMultiplayerGame();
+        });
+
+        createDuelButton.addActionListener(e -> {
+            optionsDialog.dispose();
+            createDuelMultiplayerGame();
+        });
+
+        joinDuelButton.addActionListener(e -> {
+            optionsDialog.dispose();
+            joinDuelMultiplayerGame();
         });
 
         optionsDialog.add(mainPanel);
@@ -408,7 +424,7 @@ public class JeuDeTir extends javax.swing.JFrame {
             ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
             JDialog waitDialog = new JDialog(this, "", true);
             waitDialog.setUndecorated(true);
-            waitDialog.setSize(300, 150);
+            waitDialog.setSize(450, 180);
             waitDialog.setLocationRelativeTo(this);
 
             JPanel waitPanel = new JPanel() {
@@ -432,7 +448,7 @@ public class JeuDeTir extends javax.swing.JFrame {
             ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
             JLabel iconLabel = new JLabel(infoIcon);
 
-            JLabel waitLabel = new JLabel("<html>En attente d'un autre joueur...<br>Adresse IP: " + 
+            JLabel waitLabel = new JLabel("<html>En attente d'un autre joueur...<br>Adresse IP: " +
                     getLocalIpAddress() + "<br>Port: " + SERVER_PORT + "</html>");
             waitLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
@@ -462,7 +478,7 @@ public class JeuDeTir extends javax.swing.JFrame {
                     Socket clientSocket = serverSocket.accept();
                     SwingUtilities.invokeLater(() -> {
                         waitDialog.dispose();
-                    startMultiplayerGame(clientSocket, true);
+                        startMultiplayerGame(clientSocket, true);
                     });
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -504,13 +520,14 @@ public class JeuDeTir extends javax.swing.JFrame {
         joinPanel.setLayout(new GridBagLayout());
         joinPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-        ImageIcon questionIcon = new ImageIcon("src/main/resources/images/question_icon.png");
-        JLabel iconLabel = new JLabel(questionIcon);
+        ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
+        JLabel iconLabel = new JLabel(infoIcon);
 
         JLabel promptLabel = new JLabel("Entrez l'adresse IP de l'hôte:");
         promptLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        JTextField ipField = new JTextField(15);
+        JTextField ipField = new JTextField(20);
+        ipField.setPreferredSize(new Dimension(200, 30));
         ipField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -541,9 +558,9 @@ public class JeuDeTir extends javax.swing.JFrame {
             String ipAddress = ipField.getText().trim();
             if (!ipAddress.isEmpty()) {
                 joinDialog.dispose();
-            try {
-                Socket socket = new Socket(ipAddress, SERVER_PORT);
-                startMultiplayerGame(socket, false);
+                try {
+                    Socket socket = new Socket(ipAddress, SERVER_PORT);
+                    startMultiplayerGame(socket, false);
                 } catch (IOException ex) {
                     showErrorDialog("Erreur de connexion: " + ex.getMessage());
                 }
@@ -626,6 +643,169 @@ public class JeuDeTir extends javax.swing.JFrame {
         } catch (Exception e) {
             return "127.0.0.1";
         }
+    }
+
+    private void createDuelMultiplayerGame() {
+        try {
+            ServerSocket serverSocket = new ServerSocket(SERVER_PORT);
+            JDialog waitDialog = new JDialog(this, "", true);
+            waitDialog.setUndecorated(true);
+            waitDialog.setSize(450, 180);
+            waitDialog.setLocationRelativeTo(this);
+
+            JPanel waitPanel = new JPanel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    Graphics2D g2d = (Graphics2D) g;
+                    g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                    int w = getWidth();
+                    int h = getHeight();
+                    Color color1 = new Color(240, 240, 240);
+                    Color color2 = new Color(255, 255, 255);
+                    GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+                    g2d.setPaint(gp);
+                    g2d.fillRect(0, 0, w, h);
+                }
+            };
+            waitPanel.setLayout(new GridBagLayout());
+            waitPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
+
+            ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
+            JLabel iconLabel = new JLabel(infoIcon);
+
+            JLabel waitLabel = new JLabel("<html>En attente d'un autre joueur pour le duel...<br>Adresse IP: " +
+                    getLocalIpAddress() + "<br>Port: " + SERVER_PORT + "</html>");
+            waitLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+            JButton okButton = createStyledButton("OK");
+            okButton.setPreferredSize(new Dimension(100, 30));
+
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridwidth = GridBagConstraints.REMAINDER;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.insets = new Insets(10, 20, 5, 20);
+
+            JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            headerPanel.setOpaque(false);
+            headerPanel.add(iconLabel);
+            headerPanel.add(waitLabel);
+
+            waitPanel.add(headerPanel, gbc);
+            gbc.insets = new Insets(10, 20, 10, 20);
+            waitPanel.add(okButton, gbc);
+
+            okButton.addActionListener(e -> waitDialog.dispose());
+
+            waitDialog.add(waitPanel);
+
+            new Thread(() -> {
+                try {
+                    Socket clientSocket = serverSocket.accept();
+                    SwingUtilities.invokeLater(() -> {
+                        waitDialog.dispose();
+                        String joueur = (String) comboBox1.getSelectedItem();
+                        String niveau = getNiveauSelectionne();
+                        String avion = getAvionSelectionne();
+                        dispose();
+                        new EcranDuelMultiplayer(joueur, niveau, avion, clientSocket, true);
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    SwingUtilities.invokeLater(() -> {
+                        waitDialog.dispose();
+                        showErrorDialog("Erreur de connexion: " + e.getMessage());
+                    });
+                }
+            }).start();
+
+            waitDialog.setVisible(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showErrorDialog("Erreur lors de la création de la partie: " + e.getMessage());
+        }
+    }
+
+    private void joinDuelMultiplayerGame() {
+        JDialog joinDialog = new JDialog(this, "", true);
+        joinDialog.setUndecorated(true);
+        joinDialog.setSize(350, 150);
+        joinDialog.setLocationRelativeTo(this);
+
+        JPanel joinPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+                int w = getWidth();
+                int h = getHeight();
+                Color color1 = new Color(240, 240, 240);
+                Color color2 = new Color(255, 255, 255);
+                GradientPaint gp = new GradientPaint(0, 0, color1, 0, h, color2);
+                g2d.setPaint(gp);
+                g2d.fillRect(0, 0, w, h);
+            }
+        };
+        joinPanel.setLayout(new GridBagLayout());
+        joinPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
+
+        ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
+        JLabel iconLabel = new JLabel(infoIcon);
+
+        JLabel ipLabel = new JLabel("Adresse IP:");
+        JTextField ipField = new JTextField(20);
+        ipField.setPreferredSize(new Dimension(200, 30));
+
+        JButton connectButton = createStyledButton("Se connecter");
+        connectButton.setPreferredSize(new Dimension(120, 30));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(10, 20, 5, 20);
+
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        headerPanel.setOpaque(false);
+        headerPanel.add(iconLabel);
+        headerPanel.add(new JLabel("Rejoindre une partie en duel"));
+
+        joinPanel.add(headerPanel, gbc);
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridBagLayout());
+        inputPanel.setOpaque(false);
+        GridBagConstraints inputGbc = new GridBagConstraints();
+        inputGbc.insets = new Insets(5, 5, 5, 5);
+        inputGbc.gridx = 0;
+        inputGbc.gridy = 0;
+        inputGbc.anchor = GridBagConstraints.EAST;
+        inputPanel.add(ipLabel, inputGbc);
+        inputGbc.gridx = 1;
+        inputGbc.anchor = GridBagConstraints.WEST;
+        inputPanel.add(ipField, inputGbc);
+
+        joinPanel.add(inputPanel, gbc);
+        gbc.insets = new Insets(10, 20, 10, 20);
+        joinPanel.add(connectButton, gbc);
+
+        connectButton.addActionListener(e -> {
+            String ip = ipField.getText().trim();
+            try {
+                Socket socket = new Socket(ip, SERVER_PORT);
+                joinDialog.dispose();
+                String joueur = (String) comboBox1.getSelectedItem();
+                String niveau = getNiveauSelectionne();
+                String avion = getAvionSelectionne();
+                dispose();
+                new EcranDuelMultiplayer(joueur, niveau, avion, socket, false);
+            } catch (IOException ex) {
+                showErrorDialog("Erreur de connexion: " + ex.getMessage());
+            }
+        });
+
+        joinDialog.add(joinPanel);
+        joinDialog.setVisible(true);
     }
 
     public static void main(String[] args) {
