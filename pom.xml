@@ -35,7 +35,7 @@
                     <target>${maven.compiler.target}</target>
                 </configuration>
             </plugin>
-            
+
             <!-- Maven Assembly Plugin pour créer un JAR exécutable -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
