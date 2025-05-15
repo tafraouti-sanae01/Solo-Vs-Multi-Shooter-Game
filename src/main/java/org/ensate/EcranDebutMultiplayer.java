@@ -268,7 +268,6 @@ public class EcranDebutMultiplayer extends JFrame {
     }
 
     private void startGameTimer() {
-        // Initialiser les bateaux
         bateaux.clear();
         for (int i = 0; i < BATEAU_COUNT; i++) {
             int x = random.nextInt(GAME_WIDTH - BOAT_WIDTH);
