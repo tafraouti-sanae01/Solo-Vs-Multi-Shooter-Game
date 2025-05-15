@@ -84,14 +84,14 @@ public class EcranDuelMultiplayer extends JFrame {
 
         if (isHost) {
             myX = 150;
-            myY = GAME_HEIGHT - 120; // Host en bas
+            myY = GAME_HEIGHT - 120;
             otherX = 600;
-            otherY = 120;             // Client un peu plus bas
+            otherY = 120;
         } else {
             myX = 600;
-            myY = 120;                // Client un peu plus bas
+            myY = 120;
             otherX = 150;
-            otherY = GAME_HEIGHT - 120; // Host en bas
+            otherY = GAME_HEIGHT - 120;
         }
 
         BOAT_WIDTH = 80;
@@ -124,7 +124,6 @@ public class EcranDuelMultiplayer extends JFrame {
 
     private void setupNetwork() {
         try {
-            // Toujours créer l'outputStream puis l'inputStream, flush après outputStream
             outputStream = new ObjectOutputStream(socket.getOutputStream());
             outputStream.flush();
             inputStream = new ObjectInputStream(socket.getInputStream());
@@ -132,8 +131,8 @@ public class EcranDuelMultiplayer extends JFrame {
                 outputStream.writeObject(avion);
                 outputStream.flush();
                 String avionAdverse = (String) inputStream.readObject();
-                avionJoueur1 = avion; // host
-                avionJoueur2 = avionAdverse; // client
+                avionJoueur1 = avion;
+                avionJoueur2 = avionAdverse;
                 outputStream.writeObject(joueur);
                 outputStream.flush();
                 joueur2 = (String) inputStream.readObject();
@@ -141,8 +140,8 @@ public class EcranDuelMultiplayer extends JFrame {
                 String avionAdverse = (String) inputStream.readObject();
                 outputStream.writeObject(avion);
                 outputStream.flush();
-                avionJoueur1 = avionAdverse; // host
-                avionJoueur2 = avion; // client
+                avionJoueur1 = avionAdverse;
+                avionJoueur2 = avion;
                 joueur2 = (String) inputStream.readObject();
                 outputStream.writeObject(joueur);
                 outputStream.flush();
@@ -159,11 +158,9 @@ public class EcranDuelMultiplayer extends JFrame {
         try {
             String avionMe, avionOther;
             if ((isHost && myY > otherY) || (!isHost && myY > otherY)) {
-                // Je suis en bas
                 avionMe = avionJoueur1;
                 avionOther = avionJoueur2;
             } else {
-                // Je suis en haut
                 avionMe = avionJoueur2;
                 avionOther = avionJoueur1;
             }
@@ -251,10 +248,8 @@ public class EcranDuelMultiplayer extends JFrame {
     private void shootProjectile(int x, int y, boolean isMine) {
         int direction;
         if ((isHost && myY > otherY) || (!isHost && myY > otherY)) {
-            // Joueur en bas tire vers le haut
             direction = 1;
         } else {
-            // Joueur en haut tire vers le bas
             direction = -1;
         }
         Projectile p = new Projectile(x, y, tirImage, isMine ? tirSpeed1 : tirSpeed2, direction);
@@ -270,12 +265,11 @@ public class EcranDuelMultiplayer extends JFrame {
         Rectangle myRect = new Rectangle(myX, myY, BOAT_WIDTH, BOAT_HEIGHT);
         Rectangle otherRect = new Rectangle(otherX, otherY, BOAT_WIDTH, BOAT_HEIGHT);
 
-        // Les projectiles de l'autre joueur peuvent me toucher
         for (Projectile p : otherProjectiles) {
             if (p.isActive() && myRect.intersects(p.getBounds())) {
                 p.deactivate();
                 vies1--;
-                score2 += 10; // L'autre joueur marque des points
+                score2 += 10;
                 if (vies1 <= 0 && !iAmDead) {
                     iAmDead = true;
                     gameOver = true;
@@ -284,12 +278,11 @@ public class EcranDuelMultiplayer extends JFrame {
             }
         }
 
-        // Mes projectiles peuvent toucher l'autre joueur
         for (Projectile p : myProjectiles) {
             if (p.isActive() && otherRect.intersects(p.getBounds())) {
                 p.deactivate();
                 vies2--;
-                score1 += 10; // Je marque des points
+                score1 += 10;
                 if (vies2 <= 0 && !otherIsDead) {
                     otherIsDead = true;
                     gameOver = true;
@@ -518,7 +511,6 @@ public class EcranDuelMultiplayer extends JFrame {
         }
     }
 
-    // Classe pour transmettre les projectiles en réseau
     public static class ProjectileData implements Serializable {
         public int x, y, speed;
         public ProjectileData(int x, int y, int speed) {
