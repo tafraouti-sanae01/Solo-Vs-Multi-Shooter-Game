@@ -57,7 +57,6 @@ public class JeuDeTir extends javax.swing.JFrame {
         initAvionStats();
         chargerJoueurs();
         setupEventListeners();
-        setupProgressBars();
         audioManager.startBackgroundMusic();
         setVisible(true);
         setLocationRelativeTo(null);
@@ -69,18 +68,6 @@ public class JeuDeTir extends javax.swing.JFrame {
         super.dispose();
     }
 
-    private void setupProgressBars() {
-        Vitesse.setMinimum(0);
-        Vitesse.setMaximum(100);
-        Attack.setMinimum(0);
-        Attack.setMaximum(100);
-        Vie.setMinimum(0);
-        Vie.setMaximum(100);
-
-        Vitesse.setValue(0);
-        Attack.setValue(0);
-        Vie.setValue(0);
-    }
 
     private void setupButtonGroups() {
         niveauGroup = new ButtonGroup();
@@ -326,8 +313,7 @@ public class JeuDeTir extends javax.swing.JFrame {
         mainPanel.setLayout(new GridBagLayout());
         mainPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-        ImageIcon questionIcon = new ImageIcon("src/main/resources/images/question_icon.png");
-        JLabel iconLabel = new JLabel(questionIcon);
+
 
         JLabel titleLabel = new JLabel("Que souhaitez-vous faire ?");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
@@ -345,7 +331,6 @@ public class JeuDeTir extends javax.swing.JFrame {
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         headerPanel.setOpaque(false);
-        headerPanel.add(iconLabel);
         headerPanel.add(titleLabel);
 
         mainPanel.add(headerPanel, gbc);
@@ -445,8 +430,6 @@ public class JeuDeTir extends javax.swing.JFrame {
             waitPanel.setLayout(new GridBagLayout());
             waitPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-            ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
-            JLabel iconLabel = new JLabel(infoIcon);
 
             JLabel waitLabel = new JLabel("<html>En attente d'un autre joueur...<br>Adresse IP: " +
                     getLocalIpAddress() + "<br>Port: " + SERVER_PORT + "</html>");
@@ -462,7 +445,6 @@ public class JeuDeTir extends javax.swing.JFrame {
 
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             headerPanel.setOpaque(false);
-            headerPanel.add(iconLabel);
             headerPanel.add(waitLabel);
 
             waitPanel.add(headerPanel, gbc);
@@ -520,8 +502,6 @@ public class JeuDeTir extends javax.swing.JFrame {
         joinPanel.setLayout(new GridBagLayout());
         joinPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-        ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
-        JLabel iconLabel = new JLabel(infoIcon);
 
         JLabel promptLabel = new JLabel("Entrez l'adresse IP de l'hôte:");
         promptLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -546,7 +526,6 @@ public class JeuDeTir extends javax.swing.JFrame {
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         headerPanel.setOpaque(false);
-        headerPanel.add(iconLabel);
         headerPanel.add(promptLabel);
 
         joinPanel.add(headerPanel, gbc);
@@ -597,9 +576,6 @@ public class JeuDeTir extends javax.swing.JFrame {
         errorPanel.setLayout(new GridBagLayout());
         errorPanel.setBorder(BorderFactory.createLineBorder(Color.RED, 2));
 
-        // Icône erreur
-        ImageIcon errorIcon = new ImageIcon("src/main/resources/images/error_icon.png");
-        JLabel iconLabel = new JLabel(errorIcon);
 
         JLabel messageLabel = new JLabel(message);
         messageLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -616,7 +592,6 @@ public class JeuDeTir extends javax.swing.JFrame {
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         headerPanel.setOpaque(false);
-        headerPanel.add(iconLabel);
         headerPanel.add(messageLabel);
 
         errorPanel.add(headerPanel, gbc);
@@ -671,9 +646,6 @@ public class JeuDeTir extends javax.swing.JFrame {
             waitPanel.setLayout(new GridBagLayout());
             waitPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-            ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
-            JLabel iconLabel = new JLabel(infoIcon);
-
             JLabel waitLabel = new JLabel("<html>En attente d'un autre joueur pour le duel...<br>Adresse IP: " +
                     getLocalIpAddress() + "<br>Port: " + SERVER_PORT + "</html>");
             waitLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -688,7 +660,6 @@ public class JeuDeTir extends javax.swing.JFrame {
 
             JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
             headerPanel.setOpaque(false);
-            headerPanel.add(iconLabel);
             headerPanel.add(waitLabel);
 
             waitPanel.add(headerPanel, gbc);
@@ -750,9 +721,6 @@ public class JeuDeTir extends javax.swing.JFrame {
         joinPanel.setLayout(new GridBagLayout());
         joinPanel.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180), 2));
 
-        ImageIcon infoIcon = new ImageIcon("src/main/resources/images/info_icon.png");
-        JLabel iconLabel = new JLabel(infoIcon);
-
         JLabel ipLabel = new JLabel("Adresse IP:");
         JTextField ipField = new JTextField(20);
         ipField.setPreferredSize(new Dimension(200, 30));
@@ -767,7 +735,6 @@ public class JeuDeTir extends javax.swing.JFrame {
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         headerPanel.setOpaque(false);
-        headerPanel.add(iconLabel);
         headerPanel.add(new JLabel("Rejoindre une partie en duel"));
 
         joinPanel.add(headerPanel, gbc);
